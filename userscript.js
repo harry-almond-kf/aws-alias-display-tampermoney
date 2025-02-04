@@ -3,7 +3,7 @@
 // @version      2025-01-29
 // @description  Display the current SSO session's Account Alias in the AWS Management Console.
 // @author       Harry
-// @match        https://*.eu-west-1.console.aws.amazon.com/*
+// @match        https://*.console.aws.amazon.com/*
 // @icon         https://assets.sso-portal.eu-west-1.amazonaws.com/2025-01-08-06-27-53-198/favicon.png
 // @grant        none
 // ==/UserScript==
