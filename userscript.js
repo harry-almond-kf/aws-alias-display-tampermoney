@@ -4,6 +4,7 @@
 // @description  Display the current SSO session's Account Alias in the AWS Management Console.
 // @author       Harry
 // @match        https://*.console.aws.amazon.com/*
+// @match        https://*.signin.aws.amazon.com/sessions*
 // @icon         https://assets.sso-portal.eu-west-1.amazonaws.com/2025-01-08-06-27-53-198/favicon.png
 // @grant        none
 // ==/UserScript==
@@ -42,6 +43,19 @@
     }
   }
 
+  function updateSessionLinks() {
+    const sessionLinks = document.querySelectorAll(
+      '[data-testid="session-list"] > div > div > div > div > a'
+    );
+    sessionLinks.forEach((link) => {
+      const accountId = link.textContent.trim();
+      const accountIdWithoutDashes = accountId.replaceAll("-", "");
+      if (awsAccounts[accountIdWithoutDashes]) {
+        link.textContent = `${awsAccounts[accountIdWithoutDashes]} | ${accountId}`;
+      }
+    });
+  }
+
   function waitForNavBar() {
     const observer = new MutationObserver((mutations, me) => {
       const navBar = document.querySelector(
@@ -60,6 +74,31 @@
     });
   }
 
+  function waitForSessionList() {
+    const observer = new MutationObserver((mutations, me) => {
+      const sessionLinks = document.querySelectorAll(
+        '[data-testid="session-list"]'
+      );
+      if (sessionLinks.length > 0) {
+        updateSessionLinks();
+        me.disconnect(); // stop observing
+        return;
+      }
+    });
+
+    observer.observe(document, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
   // Run on page load
-  waitForNavBar();
+  const url = window.location.href;
+  if (url.match(/^https:\/\/.*\.console\.aws\.amazon\.com\/.*$/)) {
+    waitForNavBar();
+  } else if (
+    url.match(/^https:\/\/.*\.signin\.aws\.amazon\.com\/sessions.*$/)
+  ) {
+    waitForSessionList();
+  }
 })();
