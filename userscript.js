@@ -72,6 +72,45 @@
     });
   }
 
+  function waitForMenuButton() {
+    const observer = new MutationObserver((mutations, me) => {
+      const menuButton = document.querySelector(
+        '[data-testid="awsc-nav-account-menu-button"]'
+      );
+      if (menuButton) {
+        menuButton.addEventListener("click", () => {
+          updateActiveSessionButtons();
+        });
+        me.disconnect(); // stop observing
+        return;
+      }
+    });
+
+    observer.observe(document, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  function updateActiveSessionButtons() {
+    const activeSessionAccountIdDivs = document.querySelectorAll(
+      '[data-testid="awsc-account-menu-other-session-content"] > div:nth-child(1) > div:nth-child(2) > div > div > a > div > div:nth-child(1)'
+    );
+
+    activeSessionAccountIdDivs.forEach((activeSessionAccountIdDiv) => {
+      const accountId = activeSessionAccountIdDiv.textContent
+        .split("Account ID:")[1]
+        .trim();
+      const accountIdWithoutDashes = accountId.replaceAll("-", "");
+      if (awsAccounts[accountIdWithoutDashes]) {
+        const activeSessionAccountAliasDiv = document.createElement("div");
+        activeSessionAccountAliasDiv.textContent =
+          awsAccounts[accountIdWithoutDashes];
+        activeSessionAccountIdDiv.appendChild(activeSessionAccountAliasDiv);
+      }
+    });
+  }
+
   function waitForSessionList() {
     const observer = new MutationObserver((mutations, me) => {
       let sessionLinks = document.querySelectorAll(
@@ -101,6 +140,7 @@
   const url = window.location.href;
   if (url.match(/^https:\/\/.*\.console\.aws\.amazon\.com\/.*$/)) {
     waitForNavBar();
+    waitForMenuButton();
   } else if (
     url.match(/^https:\/\/.*\.signin\.aws\.amazon\.com\/sessions.*$/)
   ) {
