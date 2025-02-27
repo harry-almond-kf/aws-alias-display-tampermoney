@@ -43,10 +43,8 @@
     }
   }
 
-  function updateSessionLinks() {
-    const sessionLinks = document.querySelectorAll(
-      '[data-testid="session-list"] > div > div > div > div > a'
-    );
+  function updateSessionLinks(sessionLinks) {
+    console.log(sessionLinks);
     sessionLinks.forEach((link) => {
       const accountId = link.textContent.trim();
       const accountIdWithoutDashes = accountId.replaceAll("-", "");
@@ -76,11 +74,18 @@
 
   function waitForSessionList() {
     const observer = new MutationObserver((mutations, me) => {
-      const sessionLinks = document.querySelectorAll(
-        '[data-testid="session-list"]'
+      let sessionLinks = document.querySelectorAll(
+        '[data-testid="session-list"] > div > div > div > div > a'
       );
+
+      if (sessionLinks.length === 0) {
+        sessionLinks = document.querySelectorAll(
+          '[data-testid="session-selector"] > div > div > div > div > div > div:nth-child(2) > div > strong'
+        );
+      }
+
       if (sessionLinks.length > 0) {
-        updateSessionLinks();
+        updateSessionLinks(sessionLinks);
         me.disconnect(); // stop observing
         return;
       }
